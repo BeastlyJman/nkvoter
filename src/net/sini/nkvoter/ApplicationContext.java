@@ -20,15 +20,16 @@
  * THE SOFTWARE.
  */
 
-package net.sini.nkvoter.core;
-
-import net.sini.nkvoter.VoterStrategy;
+package net.sini.nkvoter;
 
 /**
  * Created by Sini
  */
-public abstract class VoteStrategyAdapter extends VoterStrategy {
+public final class ApplicationContext {
     
-    public VoteStrategyAdapter() {}
+    /**
+     * Constructs a new {@link ApplicationContext};
+     */
+    public ApplicationContext() {}
 
 }

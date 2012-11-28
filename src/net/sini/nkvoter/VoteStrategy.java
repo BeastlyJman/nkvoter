@@ -22,17 +22,16 @@
 
 package net.sini.nkvoter;
 
+import java.io.IOException;
+
 /**
  * Created by Sini
  */
-public final class Main {
+public abstract class VoteStrategy {
     
     /**
-     * The main entry point for the program.
-     * 
-     * @param args  The command line arguments.
+     * Executes the protocol to vote.
      */
-    public static void main(String[] args) {
-        System.out.println();
-    }
+    public abstract void vote() throws Throwable;
+
 }

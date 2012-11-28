@@ -22,6 +22,7 @@
 
 package net.sini.nkvoter.io;
 
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -43,7 +44,7 @@ public final class TorSocketFactory extends SocketFactory {
     /**
      *  The tor proxy address.
      */
-    private static String PROXY_ADDRESS = "localhost";
+    private static String PROXY_ADDRESS = "127.0.0.1";
     
     /**
      * The tor proxy port.
@@ -53,7 +54,7 @@ public final class TorSocketFactory extends SocketFactory {
     /**
      * SOCKS4/4a connect request parameter.
      */
-    private static final int TOR_CONNECT = 0xF0;
+    private static final int TOR_CONNECT = 0x01;
     
     /**
      * The version of SOCKS that the socket utilizes.
@@ -77,6 +78,16 @@ public final class TorSocketFactory extends SocketFactory {
         os.writeByte('\0');
         os.writeBytes(address.getHostString());
         os.writeByte('\0');
+        
+        DataInputStream is = new DataInputStream(s.getInputStream());
+
+        byte version = is.readByte();
+        byte status = is.readByte();
+        if(status != 90) {		
+            throw new IOException();
+        }
+        int port = is.readShort();
+        int ipAddr = is.readInt();
         return s;
     }
 }

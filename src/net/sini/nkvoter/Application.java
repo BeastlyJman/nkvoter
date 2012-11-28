@@ -22,60 +22,30 @@
 
 package net.sini.nkvoter;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
+import net.sini.nkvoter.core.ConcreteVoteStrategy;
+import net.sini.nkvoter.io.TorSocketFactory;
 
 /**
  * Created by Sini
  */
-public final class VoterWorker implements Runnable {
+public final class Application {
     
     /**
-     * The counter for the voter worker, just to keep track of things.
-     */
-    private static final AtomicInteger COUNTER = new AtomicInteger(0);
-    
-    /**
-     * The id for this worker.
-     */
-    private final int id = COUNTER.getAndIncrement();
-    
-    /**
-     * The voter strategy for this worker.
-     */
-    private final VoterStrategy strategy;
-    
-    /**
-     * The listener for this worker.
-     */
-    private final WorkerListener listener;
-    
-    /**
-     * Constructs a new {@link VoterWorker};
+     * The main entry point for the program.
      * 
-     * @param strategy  The voter strategy to use for this worker.
-     * 
+     * @param args  The command line arguments.
      */
-    public VoterWorker(VoterStrategy strategy, WorkerListener listener) {
-        this.strategy = strategy;
-        this.listener = listener;
-    }
-
-    @Override
-    public void run() {
-        try {
-           strategy.vote(); 
-        } catch(Throwable t) {
-            listener.error(this, t);
-        }
-        listener.finished(this);
-    }
-    
-    /**
-     * Gets the id of this worker.
-     * 
-     * @return  The id.
-     */
-    public int getId() {
-        return id;
+    public static void main(String[] args) throws Throwable {
+        
+        URL url = new URL("http://polls.polldaddy.com/vote-js.php?p=6685610&b=1&a=30279773,&o=&va=16&cookie=0&url=http%3A//www.time.com/time/specials/packages/article/0%2C28804%2C2128881_2128882_2129192%2C00.html&n=");
+        System.out.println(url.getHost());
+        TorSocketFactory factory = new TorSocketFactory();
+        ConcreteVoteStrategy strategy = new ConcreteVoteStrategy(factory);
+        strategy.vote();
     }
 }

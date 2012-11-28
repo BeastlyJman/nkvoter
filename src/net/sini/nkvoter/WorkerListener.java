@@ -32,7 +32,7 @@ public abstract class WorkerListener {
      * 
      * @param worker    The worker that just finished.
      */
-    public abstract void finished(VoterWorker worker);
+    public abstract void finished(VoteWorker worker);
     
     /**
      * Reports back that a worker has encountered an exception.
@@ -40,6 +40,6 @@ public abstract class WorkerListener {
      * @param worker    The worker that just encountered an error.
      * @param throwable The throwable exception that the worker encountered.
      */
-    public abstract void error(VoterWorker worker, Throwable throwable);
+    public abstract void error(VoteWorker worker, Throwable throwable);
 
 }

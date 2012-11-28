@@ -22,16 +22,60 @@
 
 package net.sini.nkvoter;
 
-import java.io.IOException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by Sini
  */
-public abstract class VoterStrategy {
+public final class VoteWorker implements Runnable {
     
     /**
-     * Executes the protocol to vote.
+     * The counter for the voter worker, just to keep track of things.
      */
-    public abstract void vote();
+    private static final AtomicInteger COUNTER = new AtomicInteger(0);
+    
+    /**
+     * The id for this worker.
+     */
+    private final int id = COUNTER.getAndIncrement();
+    
+    /**
+     * The voter strategy for this worker.
+     */
+    private final VoteStrategy strategy;
+    
+    /**
+     * The listener for this worker.
+     */
+    private final WorkerListener listener;
+    
+    /**
+     * Constructs a new {@link VoteWorker};
+     * 
+     * @param strategy  The voter strategy to use for this worker.
+     * 
+     */
+    public VoteWorker(VoteStrategy strategy, WorkerListener listener) {
+        this.strategy = strategy;
+        this.listener = listener;
+    }
 
+    @Override
+    public void run() {
+        try {
+           strategy.vote(); 
+        } catch(Throwable t) {
+            listener.error(this, t);
+        }
+        listener.finished(this);
+    }
+    
+    /**
+     * Gets the id of this worker.
+     * 
+     * @return  The id.
+     */
+    public int getId() {
+        return id;
+    }
 }
