@@ -62,12 +62,13 @@ public final class VoteWorker implements Runnable {
 
     @Override
     public void run() {
+        boolean success = false;
         try {
-           strategy.vote(); 
+           success = strategy.vote();
         } catch(Throwable t) {
             listener.error(this, t);
         }
-        listener.finished(this);
+        listener.finished(this, success);
     }
     
     /**

@@ -22,16 +22,18 @@
 
 package net.sini.nkvoter;
 
-import java.io.IOException;
-
 /**
  * Created by Sini
  */
-public abstract class VoteStrategy {
+public enum VoteResult {
+
+    /**
+     * The vote was a success.
+     */
+    SUCCESS,
     
     /**
-     * Executes the protocol to vote.
+     * The vote was a failure.
      */
-    public abstract boolean vote() throws Throwable;
-
+    FAILURE
 }

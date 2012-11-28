@@ -23,10 +23,12 @@
 package net.sini.nkvoter.core;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.URL;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -54,6 +56,11 @@ public final class ConcreteVoteStrategy extends VoteStrategy {
     private static final String VOTE_ID_TARGET = "/n/113df4577acffec0e03c79cfc7210eb6/6685610?1111111111111)";
     
     /**
+     * The target to use to vote.
+     */
+    private static final String VOTE_TARGET = "/vote-js.php?p=6685610&b=1&a=30279773,&o=&va=16&cookie=0&url=http%3A//www.time.com/time/specials/packages/article/0%2C28804%2C2128881_2128882_2129192%2C00.html&n=";
+    
+    /**
      * The vote id pattern to use.
      */
     private static final Pattern VOTE_ID_PATTERN = Pattern.compile("=\'(.*)\'");
@@ -73,9 +80,27 @@ public final class ConcreteVoteStrategy extends VoteStrategy {
     }
     
     @Override
-    public void vote() throws Throwable {
+    public boolean vote() throws Throwable {
         String voteId = getVoteId();
-        System.out.println(voteId);
+        
+        Socket socket = socketFactory.createSocket(POLL_DADDY_POLLS_ADDRESS);
+        String request = createGetRequest(VOTE_TARGET + voteId, POLL_DADDY_POLLS_ADDRESS);
+        socket.getOutputStream().write(request.getBytes());
+        socket.getOutputStream().flush();
+        
+        Scanner scanner = new Scanner(socket.getInputStream());
+        String response = "";
+        while(scanner.hasNextLine()) {
+            response += scanner.nextLine() + "\n";
+        }
+        
+        socket.close();
+        
+        if(response.contains("We have received too many votes from you. You will be unblocked after a cooling off period")) {
+            return false;
+        }
+        
+        return true;
     }
     
     /**
@@ -94,13 +119,14 @@ public final class ConcreteVoteStrategy extends VoteStrategy {
         while(scanner.hasNextLine()) {
             response += scanner.nextLine() + "\n";
         }
+        
+        socket.close();
 
         Matcher matcher = VOTE_ID_PATTERN.matcher(response);
         String id = "";
         if(matcher.find()) {
             id = matcher.group(1);
         }
-        System.out.println(response);
         return id;
     }
     
@@ -117,7 +143,7 @@ public final class ConcreteVoteStrategy extends VoteStrategy {
             + "Accept: */*\r\n"
             + "Connection: Keep-Alive\r\n"
             + "Pragma: no-cache\r\n" 
-            + "User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322; InfoPath.1)\r\n"
+            + "User-Agent: Mozilla/5.0 (iPad; U; CPU OS 4_2_1 like Mac OS X; ja-jp) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8C148 Safari/6533.18.5\r\n"
             + "\r\n";
     }
 }
