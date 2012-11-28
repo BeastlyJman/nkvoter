@@ -31,9 +31,9 @@ public abstract class WorkerListener {
      * Reports back that a worker has finished voting.
      * 
      * @param worker    The worker that just finished.
-     * @param result    The result of the vote.
+     * @param success   The result of if the vote was successful or not.
      */
-    public abstract void finished(VoteWorker worker,  boolean success);
+    public abstract void finished(VoteWorker worker, boolean success);
     
     /**
      * Reports back that a worker has encountered an exception.
