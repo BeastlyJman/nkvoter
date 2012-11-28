@@ -30,6 +30,8 @@ import net.sini.nkvoter.SocketFactory;
 
 /**
  * Created by Sini
+ * 
+ * Mostly ripped from the TorLib created by Joe Foley
  */
 public final class TorSocketFactory extends SocketFactory {
     
@@ -37,15 +39,16 @@ public final class TorSocketFactory extends SocketFactory {
      * Constructs a new {@link TorSocketFactory};
      */
     public TorSocketFactory() {}
-    
+        
     /**
-     *  Default TOR Proxy port.
-     */
-    private static int PROXY_PORT = 9050;
-    /**
-     *  Default TOR Proxy hostaddr.
+     *  The tor proxy address.
      */
     private static String PROXY_ADDRESS = "localhost";
+    
+    /**
+     * The tor proxy port.
+     */
+    private static int PROXY_PORT = 9050;
     
     /**
      * SOCKS4/4a connect request parameter.
@@ -74,6 +77,6 @@ public final class TorSocketFactory extends SocketFactory {
         os.writeByte('\0');
         os.writeBytes(address.getHostString());
         os.writeByte('\0');
-        return (s);
+        return s;
     }
 }
