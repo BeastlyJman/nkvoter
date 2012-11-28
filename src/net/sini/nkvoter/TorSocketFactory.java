@@ -20,7 +20,7 @@
  * THE SOFTWARE.
  */
 
-package net.sini.nkvoter.io;
+package net.sini.nkvoter;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

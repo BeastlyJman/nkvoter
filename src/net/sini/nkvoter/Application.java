@@ -27,8 +27,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
-import net.sini.nkvoter.core.ConcreteVoteStrategy;
-import net.sini.nkvoter.io.TorSocketFactory;
 
 /**
  * Created by Sini
@@ -41,11 +39,9 @@ public final class Application {
      * @param args  The command line arguments.
      */
     public static void main(String[] args) throws Throwable {
-        
-        URL url = new URL("http://polls.polldaddy.com/vote-js.php?p=6685610&b=1&a=30279773,&o=&va=16&cookie=0&url=http%3A//www.time.com/time/specials/packages/article/0%2C28804%2C2128881_2128882_2129192%2C00.html&n=");
-        System.out.println(url.getHost());
         TorSocketFactory factory = new TorSocketFactory();
         ConcreteVoteStrategy strategy = new ConcreteVoteStrategy(factory);
-        strategy.vote();
+        VoteWorkerHandler handler = new VoteWorkerHandler(strategy, 5);
+        handler.start();
     }
 }

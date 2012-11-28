@@ -20,7 +20,7 @@
  * THE SOFTWARE.
  */
 
-package net.sini.nkvoter.core;
+package net.sini.nkvoter;
 
 import java.io.BufferedReader;
 import java.io.IOException;
