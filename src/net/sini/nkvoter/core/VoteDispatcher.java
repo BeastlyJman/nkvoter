@@ -37,7 +37,7 @@ public final class VoteDispatcher implements Runnable {
     /**
      * The amount of votes to make per worker.
      */
-    private static final int AMOUNT_VOTES_PER_WORKER = 25;
+    private static final int AMOUNT_VOTES_PER_WORKER = 5;
     
     /**
      * The amount of threads to create per CPU core.

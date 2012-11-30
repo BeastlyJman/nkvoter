@@ -32,16 +32,11 @@ import java.util.concurrent.Executors;
  * Created by Sini
  */
 public final class VoteEngine {
-  
-    /**
-     * The amount of threads to create per CPU core.
-     */
-    private static final int THREADS_PER_CPU_CORE = 1;
     
     /**
      * The executor for this engine.
      */
-    private final Executor executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * THREADS_PER_CPU_CORE);
+    private final Executor executor = Executors.newSingleThreadExecutor();
 
     /**
      * The vote dispatchers for this engine.

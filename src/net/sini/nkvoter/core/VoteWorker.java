@@ -88,6 +88,8 @@ public final class VoteWorker implements Runnable {
                     listener.onException(ex, this);
                 }
             }
+            
+            votesRemaining--;
         }
     }
         

@@ -32,14 +32,9 @@ import java.util.concurrent.TimeUnit;
 public final class TaskManager {
     
     /**
-     * The amount of threads to create per CPU core.
-     */
-    private static final int THREADS_PER_CPU_CORE = 1;
-    
-    /**
      * The executor for this task manager.
      */
-    private ScheduledExecutorService executor = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors() * THREADS_PER_CPU_CORE);
+    private ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
     /**
      * Constructs a new {@link TaskManager};

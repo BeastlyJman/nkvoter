@@ -20,35 +20,34 @@
  * THE SOFTWARE.
  */
 
-package net.sini.nkvoter.core.listeners;
+package net.sini.nkvoter.task.impl;
 
-import net.sini.nkvoter.core.VoteReturnStatus;
-import net.sini.nkvoter.core.VoteWorker;
-import net.sini.nkvoter.core.VoteWorkerListener;
+import net.sini.nkvoter.core.VoteEngine;
+import net.sini.nkvoter.task.Task;
 
 /**
  * Created by Sini
  */
-public final class BasicListener extends VoteWorkerListener {
+public final class PulseEngineTask extends Task {
+
+    /**
+     * The vote engine to pulse.
+     */
+    private final VoteEngine engine;
     
     /**
-     * The total count of votes.
+     * Constructs a new {@link PulseEngineTask};
+     * 
+     * @param delay     The delay between pulses.
+     * @param engine    The engine to pulse.
      */
-    private volatile int totalCount;
-
-    @Override
-    public void onVote(VoteReturnStatus returnStatus, VoteWorker worker) {
-        if(returnStatus.equals(VoteReturnStatus.SUCCESS)) {
-            System.out.println("[worker_id=" + worker.getId() + ", status=" + returnStatus + ", vote_total=" + ++totalCount + "] Successfully voted");
-        } else {
-            System.out.println("[worker_id=" + worker.getId() + ", status=" + returnStatus + "] Vote failed to vote");
-            worker.setRunning(false);
-        }
+    public PulseEngineTask(long delay, VoteEngine engine) {
+        super(delay);
+        this.engine = engine;
     }
 
     @Override
-    public void onException(Exception ex, VoteWorker worker) {
-        System.out.println("[worker_id=" + worker.getId() + ", exception=" + ex + "] Vote worker excountered exception");
-        worker.setRunning(false);
+    public void execute() {
+        engine.pulse();
     }
 }

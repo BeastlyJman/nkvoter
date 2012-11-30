@@ -30,7 +30,7 @@ import net.sini.nkvoter.task.TaskManager;
 /**
  * Created by Sini
  */
-public final class NKVoter implements Runnable {
+public final class NKVoter {
 
     /**
      * The singleton instance.
@@ -53,21 +53,9 @@ public final class NKVoter implements Runnable {
     private final TaskManager taskManager = new TaskManager();
     
     /**
-     * The flag for if the voter is currently running.
-     */
-    private boolean isRunning;
-    
-    /**
      * Constructs a new {@link NKVoter};
      */
     public NKVoter() {}
-    
-    @Override
-    public void run() {
-        while(isRunning) {
-            engine.pulse();
-        }
-    }
     
     /**
      * Gets the task manager.
@@ -85,18 +73,6 @@ public final class NKVoter implements Runnable {
      */
     public VoteEngine getEngine() {
         return engine;
-    }
-    
-    /**
-     * Starts the application.
-     */
-    public void start() {
-        if(isRunning) {
-            throw new IllegalStateException();
-        }
-        
-        isRunning = true;
-        executor.execute(this);
     }
     
     /**

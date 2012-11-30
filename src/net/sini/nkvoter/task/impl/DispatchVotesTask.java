@@ -78,6 +78,5 @@ public final class DispatchVotesTask extends Task {
                 worker.addListener(listener);
             }
         }
-        System.out.println("Waiting (antiban)...");
     }      
 }

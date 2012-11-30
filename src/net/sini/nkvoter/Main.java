@@ -22,6 +22,8 @@
 
 package net.sini.nkvoter;
 
+import java.net.InetSocketAddress;
+import java.util.Scanner;
 import net.sini.nkvoter.core.PollDaddyVoteStrategyFactory;
 import net.sini.nkvoter.core.VoteDispatcher;
 import net.sini.nkvoter.core.VoteEngine;
@@ -30,6 +32,7 @@ import net.sini.nkvoter.io.impl.NormalSocketFactory;
 import net.sini.nkvoter.io.impl.TorSocketFactory;
 import net.sini.nkvoter.task.TaskManager;
 import net.sini.nkvoter.task.impl.DispatchVotesTask;
+import net.sini.nkvoter.task.impl.PulseEngineTask;
 
 /**
  * Created by Sini
@@ -44,7 +47,7 @@ public final class Main {
     /**
      * The delay between dumping the maximum amount of votes.
      */
-    private static final long DELAY_BETWEEN_DUMPS = 6 * 60 * 1000 + 30;
+    private static final long DELAY_BETWEEN_DUMPS = 10* 60 * 1000;
     
     /**
      * The version of NKVoter.
@@ -69,13 +72,15 @@ public final class Main {
                          + "                                                                  \n"
                          + "(" + VERSION + ")                                                 \n"
                          + "==================================================================");
+        System.out.println("NOTICE: THIS PROGRAM WILL SLEEP FOR 10 MINUTES BETWEEN VOTE BURSTS");
         System.out.print("Would you like to use the Tor dispatcher? (y/n): ");
-        boolean useTor = System.in.read() == 'y';        
+        Scanner scanner = new Scanner(System.in);
+        boolean useTor = scanner.nextLine().equals("y"); 
         
         boolean useNormal = false;
         if(useTor) {
             System.out.print("Would you like to use the normal dispatcher? (y/n): ");
-            useNormal = System.in.read() == 'y';
+            useNormal = scanner.nextLine().equals("y"); 
         } else {
             useNormal = true;
         }
@@ -104,6 +109,6 @@ public final class Main {
             task.addWorkerListener(listener);
             taskManager.submit(task);
         }
-        NKVoter.getSingleton().start();
+        taskManager.submit(new PulseEngineTask(DELAY_BETWEEN_DUMPS, engine));
     }
 }
