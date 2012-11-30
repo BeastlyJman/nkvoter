@@ -50,5 +50,6 @@ public final class Main {
                          + "                                                                  \n"
                          + "(" + VERSION + ")                                                 \n"
                          + "==================================================================");
+        NKVoter.getSingleton().start();
     }
 }

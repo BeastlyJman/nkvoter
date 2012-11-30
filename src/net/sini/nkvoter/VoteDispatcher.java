@@ -23,7 +23,6 @@
 package net.sini.nkvoter;
 
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -33,6 +32,11 @@ import net.sini.nkvoter.io.SocketFactory;
  * Created by Sini
  */
 public final class VoteDispatcher implements Runnable {
+    
+    /**
+     * The amount of votes to make per worker.
+     */
+    private static final int AMOUNT_VOTES_PER_WORKER = 10;
     
     /**
      * The workers in this dispatcher.
@@ -50,6 +54,11 @@ public final class VoteDispatcher implements Runnable {
     private final VoteStrategyFactory strategyFactory;
     
     /**
+     * The flag for if this dispatcher is running.
+     */
+    private boolean isRunning;
+    
+    /**
      * Constructs a new {@link VoteDispatcher};
      * 
      * @param socketFactory     The socket factory to use when submitting requests.
@@ -64,21 +73,46 @@ public final class VoteDispatcher implements Runnable {
      * Submits a vote request to this vote dispatcher.
      * 
      * @param amountVotes   The amount of votes to submit.
+     * @reutrn              The created workers.
      */
-    public void submit(int amountVotes) {
-        VoteRequest request = new VoteRequest(socketFactory, strategyFactory.createStrategy(), amountVotes);
-        workers.add(new VoteWorker(request));
+    public VoteWorker[] submit(int amountVotes) { 
+        VoteWorker[] voteWorkers = new VoteWorker[(amountVotes / AMOUNT_VOTES_PER_WORKER) + (amountVotes % AMOUNT_VOTES_PER_WORKER != 0 ? 1 : 0)];
+        for(int i = 0; i < voteWorkers.length; i++) {
+            int votes = amountVotes;
+            if(votes > AMOUNT_VOTES_PER_WORKER) {
+                votes = AMOUNT_VOTES_PER_WORKER;
+            }
+            amountVotes -= votes;
+            
+            VoteRequest request = new VoteRequest(socketFactory, strategyFactory.createStrategy(), votes);
+            VoteWorker worker = voteWorkers[i] = new VoteWorker(request);
+            workers.add(worker);
+        }
+        return voteWorkers;
     }
 
     @Override
     public void run() {
-        Iterator<VoteWorker> iterator = workers.iterator();
-        while(iterator.hasNext()) {
-            VoteWorker worker = iterator.next();
-            worker.pulse();
-            if(worker.isRunning()) {
-                iterator.remove();
+        isRunning = true;
+        synchronized(this) {
+            Iterator<VoteWorker> iterator = workers.iterator();
+            while(iterator.hasNext()) {
+                VoteWorker worker = iterator.next();
+                worker.pulse();
+                if(worker.isRunning()) {
+                    iterator.remove();
+                }
             }
+            isRunning = false;
         }
+    }
+    
+    /**
+     * Gets if this dispatcher is running.
+     * 
+     * @return  If the dispatcher is running.
+     */
+    public boolean isRunning() {
+        return isRunning;
     }
 }
