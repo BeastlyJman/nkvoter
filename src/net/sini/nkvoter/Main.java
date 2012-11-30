@@ -28,6 +28,11 @@ package net.sini.nkvoter;
 public final class Main {
     
     /**
+     * The version of NKVoter.
+     */
+    private static final Version VERSION = new Version(1, 1, 0);
+    
+    /**
      * The main entry point of the program.
      * 
      * @param args  The command line arguments.
@@ -43,7 +48,7 @@ public final class Main {
                          + "CREDITS to Kim Jong Un, Sini, Brother, Pholey, Orion, Onon, Bla,  \n"
                          + "           TheFeel, Drunkenevil, #opfuckmorsy                     \n"
                          + "                                                                  \n"
-                         + "(VERSION 1.1.0)                                                   \n"
+                         + "(" + VERSION + ")                                                 \n"
                          + "==================================================================");
     }
 }

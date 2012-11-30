@@ -22,17 +22,68 @@
 
 package net.sini.nkvoter;
 
-import net.sini.nkvoter.io.SocketFactory;
-
 /**
  * Created by Sini
  */
-public abstract class VoteStrategyFactory {
+public final class Version {
+    
+    /**
+     * The major version.
+     */
+    private final int major;
+    
+    /**
+     * The minor version.
+     */
+    private final int minor;
+    
+    /**
+     * The sub-minor version.
+     */
+    private final int subMinor;
+    
+    /**
+     * Constructs a new {@link Version};
+     * 
+     * @param major     The major version.
+     * @param minor     The minor version.
+     * @param subMinor  The sub-minor version.
+     */
+    public Version(int major, int minor, int subMinor) {
+        this.major = major;
+        this.minor = minor;
+        this.subMinor = subMinor;
+    }
+    
+    /**
+     * Gets the major version.
+     * 
+     * @return  The major version.
+     */
+    public int getMajor() {
+        return major;
+    }
+    
+    /**
+     * Gets the minor version.
+     * 
+     * @return  The minor version.
+     */
+    public int getMinor() {
+        return minor;
+    }
 
     /**
-     * Creates a new vote strategy from a socket factory.
+     * Gets the sub-minor version.
      * 
-     * @return              The created vote strategy.
+     * @return  The sub-minor version.
      */
-    public abstract VoteStrategy createStrategy();
+    public int getSubMinor() {
+        return subMinor;
+    }
+    
+    @Override
+    public String toString() {
+        return "VERSION " + major + "." + minor + "." + subMinor;
+    }
 }

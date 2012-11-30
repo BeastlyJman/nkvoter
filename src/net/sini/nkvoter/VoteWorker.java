@@ -24,12 +24,18 @@ package net.sini.nkvoter;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import net.sini.nkvoter.io.SocketFactory;
 
 /**
  * Created by Sini
  */
 public final class VoteWorker {
+    
+    /**
+     * The id counter for all the workers.
+     */
+    private final AtomicInteger ID_COUNTER = new AtomicInteger(0);
         
     /**
      * The listeners attached to this vote worker.
@@ -40,6 +46,11 @@ public final class VoteWorker {
      * The request that this worker will complete.
      */
     private final VoteRequest request;
+    
+    /**
+     * The id of this worker.
+     */
+    private final int id;
     
     /**
      * The amount of times left to vote.
@@ -58,6 +69,7 @@ public final class VoteWorker {
      */
     public VoteWorker(VoteRequest request) {
         this.request = request;
+        id = ID_COUNTER.getAndIncrement();
         isRunning = true;
     }
 
@@ -70,14 +82,28 @@ public final class VoteWorker {
         try {
             SocketFactory factory = request.getSocketFactory();
             VoteReturnStatus status = request.getVoteStrategy().vote(factory);
+            for(VoteWorkerListener listener : listeners) {
+                listener.onVote(status, this);
+            }
         } catch(Exception ex) {
-            isRunning = false;
+            for(VoteWorkerListener listener : listeners) {
+                listener.onException(ex, this);
+            }
         }
         
         /* Check for if the worker has finished all of its votes */
         if(votesRemaining <= 0) {
             isRunning = false;
         }
+    }
+        
+    /**
+     * Adds a listener to this worker.
+     * 
+     * @param listener  The listener to add.
+     */
+    public void addListener(VoteWorkerListener listener) {
+        listeners.add(listener);
     }
     
     /**
@@ -99,12 +125,11 @@ public final class VoteWorker {
     }
     
     /**
-     * Adds a listener to this worker.
+     * Gets the id.
      * 
-     * @param listener  The listener to add.
+     * @return  The id.
      */
-    public void addListener(VoteWorkerListener listener) {
-        listeners.add(listener);
+    public int getId() {
+        return id;
     }
- 
 }
