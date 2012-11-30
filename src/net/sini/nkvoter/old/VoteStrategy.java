@@ -20,9 +20,7 @@
  * THE SOFTWARE.
  */
 
-package net.sini.nkvoter;
-
-import net.sini.nkvoter.io.SocketFactory;
+package net.sini.nkvoter.old;
 
 /**
  * Created by Sini
@@ -30,12 +28,10 @@ import net.sini.nkvoter.io.SocketFactory;
 public abstract class VoteStrategy {
     
     /**
-     * Votes using this abstract strategy.
+     * Executes the protocol to vote.
      * 
-     * @param socketFactory The socket factory to use when voting.
-     * @return              The vote return status.
-     * @throws Exception    An exception was encountered while voting.
+     * @return  If voting was successful.
      */
-    public abstract VoteReturnStatus vote(SocketFactory socketFactory) throws Exception;
+    public abstract boolean vote() throws Throwable;
 
 }

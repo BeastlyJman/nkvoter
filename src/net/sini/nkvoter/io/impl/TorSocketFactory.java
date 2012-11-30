@@ -20,14 +20,15 @@
  * THE SOFTWARE.
  */
 
-package net.sini.nkvoter;
+package net.sini.nkvoter.io.impl;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import net.sini.nkvoter.SocketFactory;
+import net.sini.nkvoter.io.SocketFactory;
+import net.sini.nkvoter.io.SocketFactory;
 
 /**
  * Created by Sini
@@ -69,17 +70,18 @@ public final class TorSocketFactory extends SocketFactory {
 
     @Override
     public Socket createSocket(InetSocketAddress address) throws IOException {
-        Socket s = new Socket(PROXY_ADDRESS, PROXY_PORT);
-        DataOutputStream os = new DataOutputStream(s.getOutputStream());
+        Socket socket = new Socket(PROXY_ADDRESS, PROXY_PORT);
+        socket.setSoTimeout(30000);
+        DataOutputStream os = new DataOutputStream(socket.getOutputStream());
         os.writeByte(SOCKS_VERSION);
         os.writeByte(TOR_CONNECT);
         os.writeShort(address.getPort());
         os.writeInt(SOCKS4A_FAKEIP);
         os.writeByte('\0');
-        os.writeBytes(address.getHostString());
+        os.writeBytes(address.getHostName());
         os.writeByte('\0');
         
-        DataInputStream is = new DataInputStream(s.getInputStream());
+        DataInputStream is = new DataInputStream(socket.getInputStream());
 
         byte version = is.readByte();
         byte status = is.readByte();
@@ -88,6 +90,6 @@ public final class TorSocketFactory extends SocketFactory {
         }
         int port = is.readShort();
         int ipAddr = is.readInt();
-        return s;
+        return socket;
     }
 }

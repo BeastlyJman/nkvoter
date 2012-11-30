@@ -22,26 +22,18 @@
 
 package net.sini.nkvoter;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
+import net.sini.nkvoter.io.SocketFactory;
 
 /**
  * Created by Sini
  */
-public final class Application {
-    
+public abstract class VoteStrategyFactory {
+
     /**
-     * The main entry point for the program.
+     * Creates a new vote strategy from a socket factory.
      * 
-     * @param args  The command line arguments.
+     * @param socketFactory The socket factory to use.
+     * @return              The created vote strategy.
      */
-    public static void main(String[] args) throws Throwable {
-        TorSocketFactory factory = new TorSocketFactory();
-        ConcreteVoteStrategy strategy = new ConcreteVoteStrategy(factory);
-        VoteWorkerHandler handler = new VoteWorkerHandler(strategy, 5);
-        handler.start();
-    }
+    public abstract VoteStrategy createStrategy(SocketFactory socketFactory);
 }

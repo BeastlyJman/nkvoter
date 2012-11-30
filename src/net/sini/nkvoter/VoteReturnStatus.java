@@ -25,15 +25,21 @@ package net.sini.nkvoter;
 /**
  * Created by Sini
  */
-public enum VoteResult {
-
+public enum VoteReturnStatus {
+    
     /**
-     * The vote was a success.
+     * The vote was recorded successfully.
      */
     SUCCESS,
     
     /**
-     * The vote was a failure.
+     * Your current IP has been banned and cannot vote.
      */
-    FAILURE
+    BANNED,
+    
+    /**
+     * The vote just mysteriously vanished.
+     */
+    UNKNOWN
+
 }

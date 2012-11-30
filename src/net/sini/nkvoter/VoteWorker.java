@@ -22,61 +22,89 @@
 
 package net.sini.nkvoter;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.LinkedList;
+import java.util.List;
+import net.sini.nkvoter.io.SocketFactory;
 
 /**
  * Created by Sini
  */
-public final class VoteWorker implements Runnable {
+public final class VoteWorker {
+        
+    /**
+     * The listeners attached to this vote worker.
+     */
+    private final List<VoteWorkerListener> listeners = new LinkedList<VoteWorkerListener>();
     
     /**
-     * The counter for the voter worker, just to keep track of things.
+     * The request that this worker will complete.
      */
-    private static final AtomicInteger COUNTER = new AtomicInteger(0);
+    private final VoteRequest request;
     
     /**
-     * The id for this worker.
+     * The amount of times left to vote.
      */
-    private final int id = COUNTER.getAndIncrement();
+    private int votesRemaining;
     
     /**
-     * The voter strategy for this worker.
+     * The flag for if this vote worker is still running.
      */
-    private final VoteStrategy strategy;
-    
-    /**
-     * The listener for this worker.
-     */
-    private final WorkerListener listener;
+    private boolean isRunning;
     
     /**
      * Constructs a new {@link VoteWorker};
      * 
-     * @param strategy  The voter strategy to use for this worker.
-     * 
+     * @param request   The request that this worker will complete.
      */
-    public VoteWorker(VoteStrategy strategy, WorkerListener listener) {
-        this.strategy = strategy;
-        this.listener = listener;
+    public VoteWorker(VoteRequest request) {
+        this.request = request;
+        isRunning = true;
     }
 
-    @Override
-    public void run() {
-        boolean success = false;
+    /**
+     * Pulses this vote worker.
+     */
+    public void pulse() {
+        votesRemaining--;
+        
         try {
-           success = strategy.vote();
-        } catch(Throwable t) {
-            listener.error(this, t);
+            SocketFactory factory = request.getSocketFactory();
+            VoteReturnStatus status = request.getVoteStrategy().vote(factory);
+        } catch(Exception ex) {
+            isRunning = false;
         }
-        listener.finished(this, success);
+        
+        /* Check for if the worker has finished all of its votes */
+        if(votesRemaining <= 0) {
+            isRunning = false;
+        }
     }
     
     /**
-     * Gets the id of this worker.
+     * Sets if this worker is running.
      * 
-     * @return  The id.
+     * @param isRunning The flag for if the worker is running.
      */
-    public int getId() {
-        return id;
+    public void setRunning(boolean isRunning) {
+        this.isRunning = isRunning;
     }
+    
+    /**
+     * Gets the the worker is still running.
+     * 
+     * @return  If the working is running.
+     */
+    public boolean isRunning() {
+        return isRunning;
+    }
+    
+    /**
+     * Adds a listener to this worker.
+     * 
+     * @param listener  The listener to add.
+     */
+    public void addListener(VoteWorkerListener listener) {
+        listeners.add(listener);
+    }
+ 
 }

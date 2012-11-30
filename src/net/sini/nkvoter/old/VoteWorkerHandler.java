@@ -20,7 +20,7 @@
  * THE SOFTWARE.
  */
 
-package net.sini.nkvoter;
+package net.sini.nkvoter.old;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -53,6 +53,26 @@ public final class VoteWorkerHandler extends WorkerListener {
     private boolean isRunning;
     
     /**
+     * The flag for if this handler is still active.
+     */
+    private boolean isActive;
+    
+    /**
+     * The total amount of successful votes.
+     */
+    private int totalAmount;
+    
+    /**
+     * The count for the successful votes.
+     */
+    private int counter;
+    
+    /**
+     * The amount of currently active workers.
+     */
+    private int activeWorkers;
+    
+    /**
      * Constructs a new {@link VoteWorkerHandler};
      * 
      * @param strategy      The vote strategy;
@@ -64,14 +84,26 @@ public final class VoteWorkerHandler extends WorkerListener {
     }
     
     /**
+     * Gets if this handler is currently active.
+     * 
+     * @return  If the handler is active.
+     */
+    public boolean isActive() {
+        synchronized(this) {
+            return isActive;    
+        }
+    }
+    
+    /**
      * Starts this handler.
      */
     public void start() {
-        if(isRunning) {
+        if(isActive) {
             throw new IllegalStateException();
         }
         
-        isRunning = true;
+        isRunning = isActive = true;
+        activeWorkers = amountWorkers;
         
         for(int i = 0; i < amountWorkers; i++) {
             executor.execute(new VoteWorker(strategy, this));
@@ -79,10 +111,29 @@ public final class VoteWorkerHandler extends WorkerListener {
     }
 
     @Override
-    public void finished(VoteWorker worker, boolean success) {
-        System.out.println("[worker=" + worker.getId() + ", success=" + success + ", time=" + getTime() + "] Finished voting");
+    public void finished(VoteWorker worker, boolean successful) {     
+        synchronized(this) {
+            if(isRunning) {
+                counter++; 
+                if(counter > 50 - amountWorkers || !successful) {
+                    isRunning = false;
+                    counter = 0;
+                }
+            }
+        }
+        if(successful) {
+            totalAmount++;
+        }
+        System.out.println("[worker=" + worker.getId() + ", success=" + successful + ", time=" + getTime() + ", success_count=" + totalAmount + "] Finished voting");
         if(isRunning) {
             executor.execute(new VoteWorker(strategy, this));
+        } else {
+            activeWorkers--;
+            if(activeWorkers <= 0) {
+                synchronized(this) {
+                    isActive = false;
+                }
+            }
         }
     }
 
@@ -91,6 +142,13 @@ public final class VoteWorkerHandler extends WorkerListener {
         System.out.println("[worker=" + worker.getId() + ", throwable=" + throwable + ", time=" + getTime() + "] Error encountered");
         if(isRunning) {
             executor.execute(new VoteWorker(strategy, this));
+        } else {
+            activeWorkers--;
+            if(activeWorkers <= 0) {
+                synchronized(this) {
+                    isActive = false;
+                }
+            }
         }
     }
     
@@ -100,8 +158,8 @@ public final class VoteWorkerHandler extends WorkerListener {
      * @return  The current time.
      */
     private static String getTime() {
-        Date date = new Date( );
-        SimpleDateFormat ft =  new SimpleDateFormat ("hh:mm:ss");
-        return ft.format(date);
+        Date date = new Date();
+        SimpleDateFormat format = new SimpleDateFormat("hh:mm:ss");
+        return format.format(date);
     }
 }

@@ -20,27 +20,22 @@
  * THE SOFTWARE.
  */
 
-package net.sini.nkvoter;
+package net.sini.nkvoter.io.impl;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import net.sini.nkvoter.io.SocketFactory;
 
 /**
  * Created by Sini
  */
-public abstract class WorkerListener {
-    
-    /**
-     * Reports back that a worker has finished voting.
-     * 
-     * @param worker    The worker that just finished.
-     * @param success   The result of if the vote was successful or not.
-     */
-    public abstract void finished(VoteWorker worker, boolean success);
-    
-    /**
-     * Reports back that a worker has encountered an exception.
-     * 
-     * @param worker    The worker that just encountered an error.
-     * @param throwable The throwable exception that the worker encountered.
-     */
-    public abstract void error(VoteWorker worker, Throwable throwable);
+public final class NormalSocketFactory extends SocketFactory {
 
+    @Override
+    public Socket createSocket(InetSocketAddress address) throws IOException {
+        Socket socket = new Socket(address.getHostName(), address.getPort());
+        socket.setSoTimeout(15000);
+        return socket;
+    }
 }

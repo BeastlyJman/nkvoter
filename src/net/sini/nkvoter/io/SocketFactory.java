@@ -20,7 +20,7 @@
  * THE SOFTWARE.
  */
 
-package net.sini.nkvoter;
+package net.sini.nkvoter.io;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
