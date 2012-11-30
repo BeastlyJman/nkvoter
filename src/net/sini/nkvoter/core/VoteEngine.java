@@ -20,7 +20,7 @@
  * THE SOFTWARE.
  */
 
-package net.sini.nkvoter;
+package net.sini.nkvoter.core;
 
 import java.util.Collection;
 import java.util.Map;

@@ -20,22 +20,35 @@
  * THE SOFTWARE.
  */
 
-package net.sini.nkvoter;
+package net.sini.nkvoter.core.listeners;
 
-import net.sini.nkvoter.io.SocketFactory;
+import net.sini.nkvoter.core.VoteReturnStatus;
+import net.sini.nkvoter.core.VoteWorker;
+import net.sini.nkvoter.core.VoteWorkerListener;
 
 /**
  * Created by Sini
  */
-public abstract class VoteStrategy {
+public final class BasicListener extends VoteWorkerListener {
     
     /**
-     * Votes using this abstract strategy.
-     * 
-     * @param socketFactory The socket factory to use when voting.
-     * @return              The vote return status.
-     * @throws Exception    An exception was encountered while voting.
+     * The total count of votes.
      */
-    public abstract VoteReturnStatus vote(SocketFactory socketFactory) throws Exception;
+    private int totalCount;
 
+    @Override
+    public synchronized void onVote(VoteReturnStatus returnStatus, VoteWorker worker) {
+        if(returnStatus.equals(VoteReturnStatus.SUCCESS)) {
+            System.out.println("[worker_id=" + worker.getId() + ", status=" + returnStatus + ", vote_total=" + ++totalCount + "] Successfully voted");
+        } else {
+            System.out.println("[worker_id=" + worker.getId() + ", status=" + returnStatus + "] Vote failed to vote");
+            worker.setRunning(false);
+        }
+    }
+
+    @Override
+    public void onException(Exception ex, VoteWorker worker) {
+        System.out.println("[worker_id=" + worker.getId() + ", exception=" + ex + "] Vote worker excountered exception");
+        worker.setRunning(false);
+    }
 }

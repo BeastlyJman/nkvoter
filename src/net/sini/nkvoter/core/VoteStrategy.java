@@ -20,26 +20,22 @@
  * THE SOFTWARE.
  */
 
-package net.sini.nkvoter;
+package net.sini.nkvoter.core;
+
+import net.sini.nkvoter.io.SocketFactory;
 
 /**
  * Created by Sini
  */
-public enum VoteReturnStatus {
+public abstract class VoteStrategy {
     
     /**
-     * The vote was recorded successfully.
+     * Votes using this abstract strategy.
+     * 
+     * @param socketFactory The socket factory to use when voting.
+     * @return              The vote return status.
+     * @throws Exception    An exception was encountered while voting.
      */
-    SUCCESS,
-    
-    /**
-     * Your current IP has been banned and cannot vote.
-     */
-    BANNED,
-    
-    /**
-     * The vote just mysteriously vanished.
-     */
-    UNKNOWN
+    public abstract VoteReturnStatus vote(SocketFactory socketFactory) throws Exception;
 
 }

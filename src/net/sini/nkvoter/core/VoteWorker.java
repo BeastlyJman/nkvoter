@@ -20,7 +20,7 @@
  * THE SOFTWARE.
  */
 
-package net.sini.nkvoter;
+package net.sini.nkvoter.core;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -30,12 +30,12 @@ import net.sini.nkvoter.io.SocketFactory;
 /**
  * Created by Sini
  */
-public final class VoteWorker {
+public final class VoteWorker implements Runnable {
     
     /**
      * The id counter for all the workers.
      */
-    private final AtomicInteger ID_COUNTER = new AtomicInteger(0);
+    private static final AtomicInteger ID_COUNTER = new AtomicInteger(0);
         
     /**
      * The listeners attached to this vote worker.
@@ -50,12 +50,7 @@ public final class VoteWorker {
     /**
      * The id of this worker.
      */
-    private final int id;
-    
-    /**
-     * The amount of times left to vote.
-     */
-    private int votesRemaining;
+    private final int id = ID_COUNTER.getAndIncrement();
     
     /**
      * The flag for if this vote worker is still running.
@@ -69,31 +64,30 @@ public final class VoteWorker {
      */
     public VoteWorker(VoteRequest request) {
         this.request = request;
-        id = ID_COUNTER.getAndIncrement();
         isRunning = true;
     }
 
-    /**
-     * Pulses this vote worker.
-     */
-    public void pulse() {
-        votesRemaining--;
-        
-        try {
-            SocketFactory factory = request.getSocketFactory();
-            VoteReturnStatus status = request.getVoteStrategy().vote(factory);
-            for(VoteWorkerListener listener : listeners) {
-                listener.onVote(status, this);
+    @Override
+    public void run() {
+        int votesRemaining = request.getAmountVotes();
+        while(votesRemaining > 0) {
+            
+            /* Check if we are running */
+            if(!isRunning) {
+                return;
             }
-        } catch(Exception ex) {
-            for(VoteWorkerListener listener : listeners) {
-                listener.onException(ex, this);
+            
+            try {
+                SocketFactory factory = request.getSocketFactory();
+                VoteReturnStatus status = request.getVoteStrategy().vote(factory);
+                for(VoteWorkerListener listener : listeners) {
+                    listener.onVote(status, this);
+                }
+            } catch(Exception ex) {
+                for(VoteWorkerListener listener : listeners) {
+                    listener.onException(ex, this);
+                }
             }
-        }
-        
-        /* Check for if the worker has finished all of its votes */
-        if(votesRemaining <= 0) {
-            isRunning = false;
         }
     }
         
@@ -113,15 +107,6 @@ public final class VoteWorker {
      */
     public void setRunning(boolean isRunning) {
         this.isRunning = isRunning;
-    }
-    
-    /**
-     * Gets the the worker is still running.
-     * 
-     * @return  If the working is running.
-     */
-    public boolean isRunning() {
-        return isRunning;
     }
     
     /**

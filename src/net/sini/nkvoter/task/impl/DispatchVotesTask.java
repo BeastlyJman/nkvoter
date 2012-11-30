@@ -24,16 +24,16 @@ package net.sini.nkvoter.task.impl;
 
 import java.util.LinkedList;
 import java.util.List;
-import net.sini.nkvoter.VoteDispatcher;
-import net.sini.nkvoter.VoteRequest;
-import net.sini.nkvoter.VoteWorker;
-import net.sini.nkvoter.VoteWorkerListener;
+import net.sini.nkvoter.core.VoteDispatcher;
+import net.sini.nkvoter.core.VoteRequest;
+import net.sini.nkvoter.core.VoteWorker;
+import net.sini.nkvoter.core.VoteWorkerListener;
 import net.sini.nkvoter.task.Task;
 
 /**
  * Created by Sini
  */
-public final class DispatchTask extends Task {
+public final class DispatchVotesTask extends Task {
     
     /**
      * The list of listeners to add to the created vote request.
@@ -51,13 +51,13 @@ public final class DispatchTask extends Task {
     private final int amountVotes;
     
     /**
-     * Constructs a new {@link DispatchTask};
+     * Constructs a new {@link DispatchVotesTask};
      * 
      * @param delay         The delay between dispatching votes.
      * @param dispatcher    The vote dispatcher to submit votes to.
      * @param amountVotes   The amount of votes to submit.
      */
-    public DispatchTask(long delay, VoteDispatcher dispatcher, int amountVotes) {
+    public DispatchVotesTask(long delay, VoteDispatcher dispatcher, int amountVotes) {
         super(delay);
         this.dispatcher = dispatcher;
         this.amountVotes = amountVotes;
@@ -78,5 +78,6 @@ public final class DispatchTask extends Task {
                 worker.addListener(listener);
             }
         }
+        System.out.println("Waiting (antiban)...");
     }      
 }

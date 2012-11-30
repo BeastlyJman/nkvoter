@@ -20,7 +20,7 @@
  * THE SOFTWARE.
  */
 
-package net.sini.nkvoter;
+package net.sini.nkvoter.core;
 
 import java.net.Socket;
 import net.sini.nkvoter.io.SocketFactory;

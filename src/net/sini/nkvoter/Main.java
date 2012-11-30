@@ -22,10 +22,29 @@
 
 package net.sini.nkvoter;
 
+import net.sini.nkvoter.core.PollDaddyVoteStrategyFactory;
+import net.sini.nkvoter.core.VoteDispatcher;
+import net.sini.nkvoter.core.VoteEngine;
+import net.sini.nkvoter.core.listeners.BasicListener;
+import net.sini.nkvoter.io.impl.NormalSocketFactory;
+import net.sini.nkvoter.io.impl.TorSocketFactory;
+import net.sini.nkvoter.task.TaskManager;
+import net.sini.nkvoter.task.impl.DispatchVotesTask;
+
 /**
  * Created by Sini
  */
 public final class Main {
+    
+    /**
+     * The maximum amount of votes.
+     */
+    private static final int MAXIMUM_VOTES = 50;
+    
+    /**
+     * The delay between dumping the maximum amount of votes.
+     */
+    private static final long DELAY_BETWEEN_DUMPS = 6 * 60 * 1000 + 30;
     
     /**
      * The version of NKVoter.
@@ -37,7 +56,7 @@ public final class Main {
      * 
      * @param args  The command line arguments.
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         System.out.println("" 
                          + " _   _ _  __ __     _____ _____ _____ ____                        \n"
                          + "| \\ | | |/ / \\ \\   / / _ |_   _| ____|  _ \\    Created by Sini\n"
@@ -50,6 +69,41 @@ public final class Main {
                          + "                                                                  \n"
                          + "(" + VERSION + ")                                                 \n"
                          + "==================================================================");
+        System.out.print("Would you like to use the Tor dispatcher? (y/n): ");
+        boolean useTor = System.in.read() == 'y';        
+        
+        boolean useNormal = false;
+        if(useTor) {
+            System.out.print("Would you like to use the normal dispatcher? (y/n): ");
+            useNormal = System.in.read() == 'y';
+        } else {
+            useNormal = true;
+        }
+        
+        PollDaddyVoteStrategyFactory strategyFactory = new PollDaddyVoteStrategyFactory();
+        VoteEngine engine = NKVoter.getSingleton().getEngine();
+        TaskManager taskManager = NKVoter.getSingleton().getTaskManager();
+        BasicListener listener = new BasicListener();
+        
+        if(useTor) {
+            TorSocketFactory socketFactory = new TorSocketFactory();
+            VoteDispatcher dispatcher = new VoteDispatcher(socketFactory, strategyFactory);
+            engine.add("TOR", dispatcher);
+            
+            DispatchVotesTask task = new DispatchVotesTask(DELAY_BETWEEN_DUMPS, dispatcher, MAXIMUM_VOTES);
+            task.addWorkerListener(listener);
+            taskManager.submit(task);
+        }
+
+        if(useNormal) {
+            NormalSocketFactory socketFactory = new NormalSocketFactory();
+            VoteDispatcher dispatcher = new VoteDispatcher(socketFactory, strategyFactory);
+            engine.add("NORMAL", dispatcher);
+
+            DispatchVotesTask task = new DispatchVotesTask(DELAY_BETWEEN_DUMPS, dispatcher, MAXIMUM_VOTES);
+            task.addWorkerListener(listener);
+            taskManager.submit(task);
+        }
         NKVoter.getSingleton().start();
     }
 }

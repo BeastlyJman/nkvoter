@@ -20,18 +20,26 @@
  * THE SOFTWARE.
  */
 
-package net.sini.nkvoter.old;
+package net.sini.nkvoter.core;
 
 /**
  * Created by Sini
  */
-public abstract class VoteStrategy {
+public enum VoteReturnStatus {
     
     /**
-     * Executes the protocol to vote.
-     * 
-     * @return  If voting was successful.
+     * The vote was recorded successfully.
      */
-    public abstract boolean vote() throws Throwable;
+    SUCCESS,
+    
+    /**
+     * Your current IP has been banned and cannot vote.
+     */
+    BANNED,
+    
+    /**
+     * The vote just mysteriously vanished.
+     */
+    UNKNOWN
 
 }

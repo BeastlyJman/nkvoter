@@ -20,27 +20,19 @@
  * THE SOFTWARE.
  */
 
-package net.sini.nkvoter.old;
+package net.sini.nkvoter.core;
+
+import net.sini.nkvoter.io.SocketFactory;
 
 /**
  * Created by Sini
  */
-public abstract class WorkerListener {
-    
-    /**
-     * Reports back that a worker has finished voting.
-     * 
-     * @param worker        The worker that just finished.
-     * @param successful    The flag for if the vote was successful.
-     */
-    public abstract void finished(VoteWorker worker, boolean successful);
-    
-    /**
-     * Reports back that a worker has encountered an exception.
-     * 
-     * @param worker    The worker that just encountered an error.
-     * @param throwable The throwable exception that the worker encountered.
-     */
-    public abstract void error(VoteWorker worker, Throwable throwable);
+public abstract class VoteStrategyFactory {
 
+    /**
+     * Creates a new vote strategy from a socket factory.
+     * 
+     * @return              The created vote strategy.
+     */
+    public abstract VoteStrategy createStrategy();
 }

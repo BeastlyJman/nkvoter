@@ -20,20 +20,20 @@
  * THE SOFTWARE.
  */
 
-package net.sini.nkvoter.old;
+package net.sini.nkvoter.core;
 
-import net.sini.nkvoter.util.RequestBuilder;
-import net.sini.nkvoter.io.SocketFactory;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import net.sini.nkvoter.io.SocketFactory;
+import net.sini.nkvoter.util.RequestBuilder;
 
 /**
  * Created by Sini
  */
-public final class SimpleVoteStrategy extends VoteStrategy {
+public final class PollDaddyVoteStrategy extends VoteStrategy {
     
     /**
      * The poll daddy socket address.
@@ -79,32 +79,23 @@ public final class SimpleVoteStrategy extends VoteStrategy {
     private static final Pattern VOTE_ID_PATTERN = Pattern.compile("=\'(.*)\'");
     
     /**
-     * The socket factory to use to create sockets with.
-     */
-    private final SocketFactory socketFactory;
-    
-    /**
      * The timestamp to use while voting.
      */
     private long timestamp;
     
     /**
-     * Constructs a new {@link SimpleVoteStrategy};
-     * 
-     * @param socketFactory The socket factory for this strategy.
+     * Constructs a new {@link PollDaddyVoteStrategy};
      */
-    public SimpleVoteStrategy(SocketFactory socketFactory) {
-        this.socketFactory = socketFactory;
-    }
-    
+    public PollDaddyVoteStrategy() {}
+   
     @Override
-    public boolean vote() throws Throwable {
+    public VoteReturnStatus vote(SocketFactory socketFactory) throws Exception {
         
         /* Get a new timestamp */
         timestamp = System.currentTimeMillis();
         
         /* Get the vote id */
-        String voteId = getVoteId();
+        String voteId = getVoteId(socketFactory);
         
         /* Open the socket for the poll and vote */
         Socket socket = socketFactory.createSocket(POLL_DADDY_POLLS_ADDRESS);
@@ -122,21 +113,25 @@ public final class SimpleVoteStrategy extends VoteStrategy {
         
         /* Close the socket */
         socket.close();
-        
+
         /* Check if our leader has been honored with a vote */
         if(response.contains("Thank you for voting!")) {
-            return true;
+            return VoteReturnStatus.SUCCESS;
+
+        } else if(response.contains("You will be unblocked after a cooling off period.")) {
+            return VoteReturnStatus.BANNED;
         }
         
-        return false;
+        return VoteReturnStatus.UNKNOWN;
     }
     
     /**
      * Gets a new vote id.
      * 
-     * @return  The created vote id.
+     * @param socketFactory The socket factory to use.
+     * @return              The created vote id.
      */
-    private String getVoteId() throws Throwable {
+    private String getVoteId(SocketFactory socketFactory) throws Exception {
         
         /* Open a socket and get the vote id */
         Socket socket = socketFactory.createSocket(POLL_DADDY_ADDRESS);

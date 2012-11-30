@@ -20,26 +20,20 @@
  * THE SOFTWARE.
  */
 
-package net.sini.nkvoter;
+package net.sini.nkvoter.core;
 
 /**
  * Created by Sini
  */
-public abstract class VoteWorkerListener {
+public final class PollDaddyVoteStrategyFactory extends VoteStrategyFactory {
 
     /**
-     * Called when the worker has completed a vote.
-     * 
-     * @param returnStatus  The return status of the vote.
-     * @param worker        The vote worker that voted.
+     * Constructs a new {@link PollDaddyVoteStrategy};
      */
-    public abstract void onVote(VoteReturnStatus returnStatus, VoteWorker worker);
+    public PollDaddyVoteStrategyFactory() {}
     
-    /**
-     * Called when the worker encountered an exception.
-     * 
-     * @param ex        The exception the vote worker encountered.
-     * @param worker    The vote worker.
-     */
-    public abstract void onException(Exception ex, VoteWorker worker);
+    @Override
+    public VoteStrategy createStrategy() {
+        return new PollDaddyVoteStrategy();
+    }
 }

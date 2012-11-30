@@ -22,6 +22,7 @@
 
 package net.sini.nkvoter;
 
+import net.sini.nkvoter.core.VoteEngine;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import net.sini.nkvoter.task.TaskManager;

@@ -20,11 +20,12 @@
  * THE SOFTWARE.
  */
 
-package net.sini.nkvoter;
+package net.sini.nkvoter.core;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import net.sini.nkvoter.io.SocketFactory;
 
@@ -36,7 +37,17 @@ public final class VoteDispatcher implements Runnable {
     /**
      * The amount of votes to make per worker.
      */
-    private static final int AMOUNT_VOTES_PER_WORKER = 10;
+    private static final int AMOUNT_VOTES_PER_WORKER = 25;
+    
+    /**
+     * The amount of threads to create per CPU core.
+     */
+    private static final int THREADS_PER_CPU_CORE = 1;
+    
+    /**
+     * The executor for this engine.
+     */
+    private final Executor executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * THREADS_PER_CPU_CORE);
     
     /**
      * The workers in this dispatcher.
@@ -98,10 +109,8 @@ public final class VoteDispatcher implements Runnable {
             Iterator<VoteWorker> iterator = workers.iterator();
             while(iterator.hasNext()) {
                 VoteWorker worker = iterator.next();
-                worker.pulse();
-                if(worker.isRunning()) {
-                    iterator.remove();
-                }
+                executor.execute(worker);
+                iterator.remove();
             }
             isRunning = false;
         }

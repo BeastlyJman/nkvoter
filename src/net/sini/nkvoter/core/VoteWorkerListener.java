@@ -20,19 +20,26 @@
  * THE SOFTWARE.
  */
 
-package net.sini.nkvoter;
-
-import net.sini.nkvoter.io.SocketFactory;
+package net.sini.nkvoter.core;
 
 /**
  * Created by Sini
  */
-public abstract class VoteStrategyFactory {
+public abstract class VoteWorkerListener {
 
     /**
-     * Creates a new vote strategy from a socket factory.
+     * Called when the worker has completed a vote.
      * 
-     * @return              The created vote strategy.
+     * @param returnStatus  The return status of the vote.
+     * @param worker        The vote worker that voted.
      */
-    public abstract VoteStrategy createStrategy();
+    public abstract void onVote(VoteReturnStatus returnStatus, VoteWorker worker);
+    
+    /**
+     * Called when the worker encountered an exception.
+     * 
+     * @param ex        The exception the vote worker encountered.
+     * @param worker    The vote worker.
+     */
+    public abstract void onException(Exception ex, VoteWorker worker);
 }
