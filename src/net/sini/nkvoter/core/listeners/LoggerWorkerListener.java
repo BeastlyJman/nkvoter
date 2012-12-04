@@ -22,6 +22,7 @@
 
 package net.sini.nkvoter.core.listeners;
 
+import java.io.PrintStream;
 import net.sini.nkvoter.core.VoteReturnStatus;
 import net.sini.nkvoter.core.VoteWorker;
 import net.sini.nkvoter.core.VoteWorkerListener;
@@ -29,26 +30,38 @@ import net.sini.nkvoter.core.VoteWorkerListener;
 /**
  * Created by Sini
  */
-public final class BasicListener extends VoteWorkerListener {
+public final class LoggerWorkerListener extends VoteWorkerListener {
     
     /**
-     * The total count of votes.
+     * The output stream for this logger.
      */
-    private volatile int totalCount;
+    private final PrintStream ps;
+    
+    /**
+     * The total amount of votes.
+     */
+    private int totalCount;
+    
+    /**
+     * Constructs a new {@link LoggerWorkerListener};
+     * 
+     * @param ps    The print stream to log to. 
+     */
+    public LoggerWorkerListener(PrintStream ps) {
+        this.ps = ps;
+    }
 
     @Override
     public void onVote(VoteReturnStatus returnStatus, VoteWorker worker) {
         if(returnStatus.equals(VoteReturnStatus.SUCCESS)) {
-            System.out.println("[worker_id=" + worker.getId() + ", status=" + returnStatus + ", vote_total=" + ++totalCount + "] Successfully voted");
+            ps.println("[worker_id=" + worker.getId() + ", status=" + returnStatus + ", vote_total=" + ++totalCount + "] Successfully voted");
         } else {
-            System.out.println("[worker_id=" + worker.getId() + ", status=" + returnStatus + "] Vote failed to vote");
-            worker.setRunning(false);
+            ps.println("[worker_id=" + worker.getId() + ", status=" + returnStatus + "] Vote failed to vote");
         }
     }
 
     @Override
     public void onException(Exception ex, VoteWorker worker) {
         System.out.println("[worker_id=" + worker.getId() + ", exception=" + ex + "] Vote worker excountered exception");
-        worker.setRunning(false);
     }
 }

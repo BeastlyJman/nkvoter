@@ -35,6 +35,11 @@ public final class RequestBuilder {
      * The list of headers for this request.
      */
     private final List<Header> headers = new LinkedList<Header>();
+    
+    /**
+     * The type of the request.
+     */
+    private final String type;
    
     /**
      * The target of the request.
@@ -76,10 +81,12 @@ public final class RequestBuilder {
     /**
      * Constructs a new {@link RequestBuilder};
      * 
+     * @param type      The type of the request.
      * @param target    The target of the request.
      * @param address   The address of the request.
      */
-    public RequestBuilder(String target, InetSocketAddress address) {
+    public RequestBuilder(String type, String target, InetSocketAddress address) {
+        this.type = type;
         this.target = target;
         this.address = address;
     }
@@ -100,11 +107,8 @@ public final class RequestBuilder {
      * @return  The build request.
      */
     public String build() {
-        String request = "GET  " + target +" HTTP/1.0\r\n"
-            + "Host: " + address.getHostName() + ":" + address.getPort() + "\r\n"
-            + "Accept: */*\r\n"
-            + "Connection: Keep-Alive\r\n"
-            + "Pragma: no-cache\r\n";
+        String request = type + " " + target +" HTTP/1.0\r\n"
+            + "Host: " + address.getHostName() + ":" + address.getPort() + "\r\n";
         for(Header header : headers) {
             request += header.name + ": " + header.value + "\r\n";
         }

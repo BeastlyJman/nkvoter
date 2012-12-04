@@ -22,8 +22,10 @@
 
 package net.sini.nkvoter.core;
 
+import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.URLEncoder;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -44,11 +46,6 @@ public final class PollDaddyVoteStrategy extends VoteStrategy {
      * The poll daddy polls socket address.
      */
     private static final InetSocketAddress POLL_DADDY_POLLS_ADDRESS = new InetSocketAddress("polls.polldaddy.com", 80);
-    
-    /**
-     * The target to get the vote id. 
-     */
-    private static final String VOTE_ID_TARGET = "/n/113df4577acffec0e03c79cfc7210eb6/6685610?";
     
     /**
      * The target to use to vote.
@@ -79,6 +76,11 @@ public final class PollDaddyVoteStrategy extends VoteStrategy {
     private static final Pattern VOTE_ID_PATTERN = Pattern.compile("=\'(.*)\'");
     
     /**
+     * The poll for this strategy.
+     */
+    private final PollDaddyPoll poll;
+    
+    /**
      * The timestamp to use while voting.
      */
     private long timestamp;
@@ -86,7 +88,9 @@ public final class PollDaddyVoteStrategy extends VoteStrategy {
     /**
      * Constructs a new {@link PollDaddyVoteStrategy};
      */
-    public PollDaddyVoteStrategy() {}
+    public PollDaddyVoteStrategy(PollDaddyPoll poll) {
+        this.poll = poll;
+    }
    
     @Override
     public VoteReturnStatus vote(SocketFactory socketFactory) throws Exception {
@@ -99,7 +103,7 @@ public final class PollDaddyVoteStrategy extends VoteStrategy {
         
         /* Open the socket for the poll and vote */
         Socket socket = socketFactory.createSocket(POLL_DADDY_POLLS_ADDRESS);
-        RequestBuilder builder = createRequestBuilder(VOTE_TARGET + voteId, POLL_DADDY_POLLS_ADDRESS);
+        RequestBuilder builder = createRequestBuilder("/vote-js.php?p=" + poll.getPollId() + "&b=1&a=" + poll.getOptionId() + "&o=&va=16&c=1&url=" + escapeString(poll.getReferenceUrl()) + "&n=" + voteId, POLL_DADDY_POLLS_ADDRESS);
         builder.addHeader("Cookie", VOTE_COOKIE + "PD_poll_6685715_1=" + (timestamp - 1000 * 60 * 180));
         socket.getOutputStream().write(builder.build().getBytes());
         socket.getOutputStream().flush();
@@ -135,7 +139,7 @@ public final class PollDaddyVoteStrategy extends VoteStrategy {
         
         /* Open a socket and get the vote id */
         Socket socket = socketFactory.createSocket(POLL_DADDY_ADDRESS);
-        RequestBuilder builder = createRequestBuilder(VOTE_ID_TARGET + timestamp, POLL_DADDY_ADDRESS);
+        RequestBuilder builder = createRequestBuilder("/n/" + poll.getPollHash() + "/" + poll.getPollId() + "?" + timestamp, POLL_DADDY_ADDRESS);
         builder.addHeader("Cookie", VOTE_ID_COOKIE);
         socket.getOutputStream().write(builder.build().getBytes());
         socket.getOutputStream().flush();
@@ -168,10 +172,23 @@ public final class PollDaddyVoteStrategy extends VoteStrategy {
      * @return          The request builder.
      */
     public RequestBuilder createRequestBuilder(String target, InetSocketAddress address) {
-        RequestBuilder builder = new RequestBuilder(target, address);
+        RequestBuilder builder = new RequestBuilder("GET", target, address);
+        builder.addHeader("Accept", "*/*");
+        builder.addHeader("Connection", "Keep-Alive");
+        builder.addHeader("Pragma", "no-cache");
         builder.addHeader("Host", "polldaddy.com");
-        builder.addHeader("Referer", "http://www.time.com/time/specials/packages/article/0,28804,2128881_2128882_2129214,00.html");
+        builder.addHeader("Referer", poll.getReferenceUrl());
         builder.addHeader("User-Agent", "Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.57 Safari/537.1");
         return builder;
+    }
+    
+    /**
+     * Gets an escape string value.
+     * 
+     * @param str   The string.
+     * @return      The escape string value.
+     */
+    public static String escapeString(String str) throws UnsupportedEncodingException {
+        return URLEncoder.encode(str, "UTF-8").replaceAll("\\+", "%20").replaceAll("\\%2F", "/");
     }
 }

@@ -20,29 +20,31 @@
  * THE SOFTWARE.
  */
 
-package net.sini.nkvoter.core;
+package net.sini.nkvoter.core.listeners;
+
+import net.sini.nkvoter.core.VoteReturnStatus;
+import net.sini.nkvoter.core.VoteWorker;
+import net.sini.nkvoter.core.VoteWorkerListener;
 
 /**
  * Created by Sini
  */
-public final class PollDaddyVoteStrategyFactory extends VoteStrategyFactory {
+public final class BasicWorkerListener extends VoteWorkerListener {
+    
+    /**
+     * Constructs a new {@link VoteWorkerListener};
+     */
+    public BasicWorkerListener() {}
 
-    /**
-     * The poll for this strategy factory.
-     */
-    private final PollDaddyPoll poll;
-    
-    /**
-     * Constructs a new {@link PollDaddyVoteStrategy};
-     * 
-     * @oaram poll  The poll for the strategy factory.
-     */
-    public PollDaddyVoteStrategyFactory(PollDaddyPoll poll) {
-        this.poll = poll;
-    }
-    
     @Override
-    public VoteStrategy createStrategy() {
-        return new PollDaddyVoteStrategy(poll);
+    public void onVote(VoteReturnStatus returnStatus, VoteWorker worker) {
+        if(returnStatus.equals(VoteReturnStatus.BANNED)) {
+            worker.setRunning(false);
+        }
+    }
+
+    @Override
+    public void onException(Exception ex, VoteWorker worker) {
+        worker.setRunning(false);
     }
 }
